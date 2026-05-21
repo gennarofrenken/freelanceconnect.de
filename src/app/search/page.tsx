@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SearchView } from "./SearchView";
 import Loading from "./loading";
+import { listAllProjectsHybrid } from "@/lib/db/listing-queries";
 
 export const metadata: Metadata = {
   title: "Projekte & Freelancer finden",
@@ -10,10 +11,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/search" },
 };
 
-export default function SearchPage() {
+// User-spezifische Sichtbarkeit (RLS) — pro Request rendern.
+export const dynamic = "force-dynamic";
+
+export default async function SearchPage() {
+  const { combined, fromDb } = await listAllProjectsHybrid();
+
   return (
     <Suspense fallback={<Loading />}>
-      <SearchView />
+      <SearchView initialProjects={combined} dbProjectCount={fromDb.length} />
     </Suspense>
   );
 }

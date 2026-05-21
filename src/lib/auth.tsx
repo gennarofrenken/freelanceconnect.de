@@ -51,7 +51,9 @@ export interface AuthState {
     password: string,
   ) => Promise<{ error?: string }>;
   /** Echte Registrierung — nur im Supabase-Mode. */
-  signUp: (input: SignUpInput) => Promise<{ error?: string }>;
+  signUp: (
+    input: SignUpInput,
+  ) => Promise<{ error?: string; needsEmailConfirmation?: boolean }>;
 }
 
 const STORAGE_KEY = "freelanceconnect:auth:v1";
@@ -220,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return { error: "Supabase-Client nicht verfügbar." };
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: input.email,
       password: input.password,
       options: {
@@ -229,9 +231,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: input.role,
           company_name: input.companyName ?? null,
         },
+        emailRedirectTo: `${window.location.origin}/login?confirmed=1`,
       },
     });
-    return error ? { error: error.message } : {};
+    if (error) return { error: error.message };
+    const needsEmailConfirmation = !data.session && !!data.user;
+    return { needsEmailConfirmation };
   }, []);
 
   return (
@@ -263,7 +268,7 @@ export function useAuth() {
       logout: async () => undefined,
       setFlag: () => undefined,
       signInWithPassword: async () => ({ error: "AuthProvider fehlt." }),
-      signUp: async () => ({ error: "AuthProvider fehlt." }),
+      signUp: async () => ({ error: "AuthProvider fehlt.", needsEmailConfirmation: false }),
     } satisfies AuthState;
   }
   return ctx;

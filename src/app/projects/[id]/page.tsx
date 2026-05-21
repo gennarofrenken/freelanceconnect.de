@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { ProjectJobPostingJsonLd } from "@/components/seo/JsonLd";
 import { ContactDialog } from "@/components/details/ContactDialog";
+import { ApplyToProject } from "@/components/details/ApplyToProject";
 import { CompanyName } from "@/components/legal/Identity";
 import { FreelancerCard } from "@/components/cards/FreelancerCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
@@ -202,13 +203,9 @@ export default async function ProjectDetailPage({ params }: Params) {
               </dl>
 
               <div className="mt-6 flex flex-col gap-2">
-                <ContactDialog
-                  mode="apply"
-                  targetTitle={project.title}
-                  triggerLabel="Auf Projekt bewerben"
-                  triggerVariant="primary"
-                  triggerSize="lg"
-                  triggerClassName="w-full"
+                <ApplyToProject
+                  projectId={project.id}
+                  projectTitle={project.title}
                 />
                 <p className="text-center text-xs text-ink-500">
                   Bewerbung mit Connect Pro · 0 % Vermittlungsgebühr

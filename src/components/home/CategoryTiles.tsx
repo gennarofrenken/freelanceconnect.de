@@ -2,14 +2,24 @@ import Link from "next/link";
 import {
   ArrowRight,
   Banknote,
+  Briefcase,
   Building2,
+  Car,
+  Factory,
   FlaskConical,
+  GraduationCap,
+  HardHat,
   Landmark,
   Lightbulb,
+  MoreHorizontal,
   MonitorSmartphone,
+  Plane,
   Radio,
   ShieldCheck,
+  ShoppingBag,
+  Sparkles,
   Truck,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -22,14 +32,22 @@ import { MOCK_PROJECTS } from "@/constants/mock-data";
 
 const GROUP_ICONS: Record<IndustryGroupSlug, LucideIcon> = {
   "it-software": MonitorSmartphone,
+  telekommunikation: Radio,
   finanzdienstleistungen: Banknote,
   versicherungen: ShieldCheck,
-  "industrie-engineering": Building2,
+  automotive: Car,
+  "industrie-engineering": Factory,
+  "energie-versorgung": Zap,
+  bauwesen: HardHat,
   "life-sciences": FlaskConical,
-  "telekom-medien": Radio,
-  "logistik-handel": Truck,
+  logistik: Truck,
+  handel: ShoppingBag,
+  "medien-marketing": Sparkles,
   "beratung-services": Lightbulb,
+  "bildung-forschung": GraduationCap,
   "oeffentlicher-sektor": Landmark,
+  "reise-touristik": Plane,
+  sonstige: MoreHorizontal,
 };
 
 const PREVIEW_ITEMS = 3;

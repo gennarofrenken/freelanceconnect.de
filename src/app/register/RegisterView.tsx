@@ -174,6 +174,8 @@ function RegisterForm({ role }: { role: Role }) {
   const { signUp, isSupabase } = useAuth();
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [prefill, setPrefill] = useState<ExtractedProfile | null>(null);
   const [firstName, setFirstName] = useState("");
@@ -230,7 +232,7 @@ function RegisterForm({ role }: { role: Role }) {
     if (Object.keys(next).length > 0) return;
 
     setPending(true);
-    const { error } = await signUp({
+    const result = await signUp({
       email,
       password,
       role: role === "company" ? "recruiter" : "freelancer",
@@ -238,10 +240,12 @@ function RegisterForm({ role }: { role: Role }) {
       companyName: role === "company" ? company : undefined,
     });
     setPending(false);
-    if (error) {
-      setErrors({ form: error });
+    if (result.error) {
+      setErrors({ form: result.error });
       return;
     }
+    setSubmittedEmail(email);
+    setNeedsConfirm(!!result.needsEmailConfirmation);
     setDone(true);
   }
 
@@ -249,23 +253,43 @@ function RegisterForm({ role }: { role: Role }) {
     return (
       <div
         role="status"
-        className="rounded-2xl border border-success-500/20 bg-success-500/5 p-6 text-sm text-ink-700"
+        className="rounded-2xl border border-success-500/30 bg-success-500/5 p-6 text-sm text-ink-700"
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-success-500/10 text-success-600">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-success-600 ring-1 ring-success-500/30">
             <Check className="h-5 w-5" aria-hidden />
           </span>
-          <p className="font-medium text-ink-900">
-            Vielen Dank — Ihre Registrierung wurde vorgemerkt.
+          <p className="text-base font-semibold text-ink-900">
+            Konto angelegt
           </p>
         </div>
-        <p className="mt-3 leading-relaxed text-ink-600">
-          Wir befinden uns aktuell in der geschlossenen Vorab-Phase. Sobald Ihr
-          Konto freigeschaltet ist, erhalten Sie eine Bestätigung per E-Mail.
-        </p>
-        <Button href="/" variant="outline" size="md" className="mt-5">
-          Zur Startseite
-        </Button>
+        {needsConfirm ? (
+          <>
+            <p className="mt-3 leading-relaxed text-ink-700">
+              Wir haben Ihnen eine Bestätigungs-E-Mail an{" "}
+              <span className="font-medium text-ink-900">{submittedEmail}</span>{" "}
+              geschickt. <strong>Bitte klicken Sie den Link in der Mail</strong>,
+              um Ihr Konto zu aktivieren. Danach können Sie sich einloggen.
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-ink-500">
+              Tipp: Schauen Sie auch in den Spam-Ordner. Die Mail kann ein paar
+              Sekunden brauchen.
+            </p>
+          </>
+        ) : (
+          <p className="mt-3 leading-relaxed text-ink-700">
+            Ihr Konto ist sofort aktiv. Sie können jetzt Projekte einstellen
+            oder Ihre Profilangaben vervollständigen.
+          </p>
+        )}
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+          <Button href="/login" variant="primary" size="md">
+            Zum Login
+          </Button>
+          <Button href="/" variant="outline" size="md">
+            Zur Startseite
+          </Button>
+        </div>
       </div>
     );
   }
@@ -395,6 +419,16 @@ function RegisterForm({ role }: { role: Role }) {
         label="Ich möchte gelegentlich Updates zu passenden Projekten und neuen Funktionen erhalten."
         hint="Widerruf jederzeit per Link in jeder E-Mail."
       />
+
+      {errors.form && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="rounded-lg border border-warning-100 bg-warning-50 px-4 py-3 text-sm text-warning-700"
+        >
+          {errors.form}
+        </div>
+      )}
 
       <Button
         type="submit"

@@ -3,6 +3,14 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MOCK_PROJECTS, MOCK_FREELANCERS } from "@/constants/mock-data";
+import type { Project } from "@/types";
+
+interface SearchViewProps {
+  /** Server-seitig vorgeladene Projekte (DB + Mock-Fallback) */
+  initialProjects?: Project[];
+  /** Wie viele davon aus der echten DB stammen — für „Live"-Hinweis */
+  dbProjectCount?: number;
+}
 import {
   findIndustryGroupBySlug,
   findIndustryGroupByItem,
@@ -48,7 +56,8 @@ function matchesQuery(haystack: string, query: string) {
   return haystack.toLowerCase().includes(query.trim().toLowerCase());
 }
 
-export function SearchView() {
+export function SearchView({ initialProjects, dbProjectCount = 0 }: SearchViewProps = {}) {
+  const PROJECTS_POOL = initialProjects ?? MOCK_PROJECTS;
   const params = useSearchParams();
   const initialType = (params.get("type") as SearchFilters["type"]) ?? "all";
   const initialQuery = params.get("q") ?? "";
@@ -82,7 +91,7 @@ export function SearchView() {
       filters.type === "all" || filters.type === "freelancers";
 
     const projects: SearchResult[] = includeProjects
-      ? MOCK_PROJECTS.filter((p) => {
+      ? PROJECTS_POOL.filter((p) => {
           if (
             !matchesQuery(
               `${p.title} ${p.company} ${p.industry} ${p.skills.join(" ")} ${p.location} ${p.region ?? ""}`,

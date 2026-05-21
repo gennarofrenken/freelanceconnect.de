@@ -1,3 +1,12 @@
+/**
+ * Branchen-Modell — angelehnt an die Projektsuche-Filter von
+ * freelancermap.de und freelance.de. Bewährte Hauptbranchen mit den
+ * jeweils dort üblichen Unterbranchen.
+ *
+ * Wenn du eine Branche umbenennst: prüfe auch `src/constants/mock-data.ts`
+ * (alle Strings in `industry:` müssen weiterhin in einer der `items`-Listen
+ * vorkommen, sonst greifen die Suchfilter ins Leere).
+ */
 export const INDUSTRY_GROUPS = [
   {
     label: "IT & Software",
@@ -6,6 +15,7 @@ export const INDUSTRY_GROUPS = [
     projectCount: 8420,
     items: [
       "IT & Softwareentwicklung",
+      "Softwareentwicklung",
       "SAP & ERP",
       "Cloud & DevOps",
       "Data Science & KI",
@@ -14,104 +24,205 @@ export const INDUSTRY_GROUPS = [
       "Web & E-Commerce",
       "Embedded Systems",
       "Test & QA",
+      "Hardware",
+      "IT-Beratung",
+      "Datenbanken & BI",
+      "Netzwerk & Infrastruktur",
     ],
   },
   {
-    label: "Finanzdienstleistungen",
+    label: "Telekommunikation",
+    slug: "telekommunikation",
+    blurb: "Mobilfunk, Netzbetrieb, OSS/BSS, 5G",
+    projectCount: 540,
+    items: [
+      "Telekommunikation",
+      "Mobilfunk & Netzbetrieb",
+      "OSS / BSS",
+      "Netzplanung",
+    ],
+  },
+  {
+    label: "Banken & Finanzdienstleistungen",
     slug: "finanzdienstleistungen",
     blurb: "Banken, FinTech, Asset Management, Risk",
-    projectCount: 1340,
+    projectCount: 2340,
     items: [
       "Banken & Kapitalmarkt",
       "Asset Management",
       "Zahlungsverkehr & FinTech",
       "Risk & Compliance",
+      "Kreditwesen",
+      "Wertpapiere & Handel",
     ],
   },
   {
     label: "Versicherungen",
     slug: "versicherungen",
     blurb: "Leben, Sach, Rück, InsurTech",
-    projectCount: 720,
+    projectCount: 1120,
     items: [
       "Lebens- & Krankenversicherung",
       "Sach- & Schadenversicherung",
       "Rückversicherung",
       "InsurTech",
+      "Aktuariat",
     ],
   },
   {
-    label: "Industrie & Engineering",
-    slug: "industrie-engineering",
-    blurb: "Automotive, Maschinenbau, Elektrotechnik, Energie",
-    projectCount: 1180,
+    label: "Automotive",
+    slug: "automotive",
+    blurb: "OEM, Tier-1, E-Mobility, ADAS, Autonomous Driving",
+    projectCount: 1780,
     items: [
       "Automotive",
+      "OEM & Tier-1",
+      "E-Mobility",
+      "Autonomous Driving / ADAS",
+      "Fahrzeug-Elektronik",
+    ],
+  },
+  {
+    label: "Industrie & Maschinenbau",
+    slug: "industrie-engineering",
+    blurb: "Maschinenbau, Anlagenbau, Elektrotechnik, Automatisierung",
+    projectCount: 1980,
+    items: [
       "Maschinen- & Anlagenbau",
       "Elektrotechnik",
+      "Automatisierung",
       "Luft- & Raumfahrt",
+      "Chemie & Verfahrenstechnik",
+      "Stahl & Metallverarbeitung",
+    ],
+  },
+  {
+    label: "Energie & Versorgung",
+    slug: "energie-versorgung",
+    blurb: "Strom, Gas, Wasser, Erneuerbare, Netze",
+    projectCount: 870,
+    items: [
       "Energieversorgung",
+      "Stadtwerke",
+      "Erneuerbare Energien",
+      "Wasserwirtschaft",
+      "Smart Grid",
+    ],
+  },
+  {
+    label: "Bauwesen & Architektur",
+    slug: "bauwesen",
+    blurb: "Hoch- und Tiefbau, Architektur, BIM",
+    projectCount: 410,
+    items: [
+      "Hochbau",
+      "Tiefbau",
+      "Architektur",
+      "BIM & Planung",
       "Bauwesen & Architektur",
     ],
   },
   {
-    label: "Life Sciences",
+    label: "Pharma, Medizin & Healthcare",
     slug: "life-sciences",
     blurb: "Pharma, Medizintechnik, Biotech, Healthcare-IT",
-    projectCount: 540,
+    projectCount: 840,
     items: [
       "Pharma",
       "Medizintechnik",
       "Biotech",
       "Klinikbetrieb & Healthcare-IT",
+      "eHealth",
     ],
   },
   {
-    label: "Telekommunikation & Medien",
-    slug: "telekom-medien",
-    blurb: "Telekom, Verlag, Marketing, Entertainment",
-    projectCount: 480,
-    items: [
-      "Telekommunikation",
-      "Medien & Verlag",
-      "Marketing & Werbung",
-      "Spiele & Entertainment",
-    ],
-  },
-  {
-    label: "Logistik & Handel",
-    slug: "logistik-handel",
-    blurb: "Supply Chain, Transport, Retail, Konsumgüter",
+    label: "Logistik & Transport",
+    slug: "logistik",
+    blurb: "Supply Chain, Transport, Spedition, Lager",
     projectCount: 620,
     items: [
       "Logistik & Supply Chain",
       "Transport & Verkehr",
+      "Spedition",
+      "Warehousing",
+    ],
+  },
+  {
+    label: "Handel & E-Commerce",
+    slug: "handel",
+    blurb: "Retail, E-Commerce, Konsumgüter",
+    projectCount: 730,
+    items: [
       "Handel & Retail",
+      "E-Commerce",
       "Konsumgüter",
+      "Marktplätze",
+    ],
+  },
+  {
+    label: "Medien & Marketing",
+    slug: "medien-marketing",
+    blurb: "Verlag, Werbung, Spiele, Entertainment",
+    projectCount: 480,
+    items: [
+      "Medien & Verlag",
+      "Marketing & Werbung",
+      "Spiele & Entertainment",
+      "Online-Medien",
     ],
   },
   {
     label: "Beratung & Services",
     slug: "beratung-services",
-    blurb: "Management, HR, Recht, Bildung",
-    projectCount: 390,
+    blurb: "Management, HR, Recht, Steuern, Personalwesen",
+    projectCount: 1290,
     items: [
       "Beratung & Management",
       "Personalwesen / HR",
       "Recht & Steuern",
+      "Unternehmensberatung",
+    ],
+  },
+  {
+    label: "Bildung & Forschung",
+    slug: "bildung-forschung",
+    blurb: "Hochschule, EdTech, Forschungseinrichtungen",
+    projectCount: 220,
+    items: [
       "Bildung & Forschung",
+      "Hochschule",
+      "EdTech",
+      "Forschungsinstitute",
     ],
   },
   {
     label: "Öffentlicher Sektor",
     slug: "oeffentlicher-sektor",
-    blurb: "Verwaltung, Verteidigung, Non-Profit",
-    projectCount: 310,
+    blurb: "Verwaltung (Bund/Länder/Kommunen), Verteidigung",
+    projectCount: 510,
     items: [
       "Bundes-, Landes- & Kommunalverwaltung",
       "Verteidigung & Sicherheit",
       "Non-Profit & Verbände",
     ],
+  },
+  {
+    label: "Reise & Touristik",
+    slug: "reise-touristik",
+    blurb: "Touristik, Hotellerie, Verkehrsträger",
+    projectCount: 180,
+    items: [
+      "Reise & Touristik",
+      "Hotellerie & Gastronomie",
+      "Luftfahrt-Operator",
+    ],
+  },
+  {
+    label: "Sonstige",
+    slug: "sonstige",
+    blurb: "Branchen, die nicht eindeutig in eine Kategorie fallen",
+    projectCount: 150,
+    items: ["Sonstige"],
   },
 ] as const;
 
@@ -135,8 +246,6 @@ export function findIndustryGroupByItem(
 
 /**
  * Skaliert die deklarierte projectCount-Baseline um den Mock-Anteil der Gruppe.
- * Mock hat nur 16 Projekte — würde sonst 0 oder 1 anzeigen. Baseline + Mock-Boost
- * sorgt für glaubwürdige UI ohne Backend.
  */
 export function projectCountForGroup(
   group: IndustryGroup,
