@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Textarea, Checkbox } from "@/components/ui/Input";
 import { INDUSTRIES } from "@/constants/industries";
 import { TOP_SKILLS, CITIES } from "@/constants/skills";
+import { createProjectAction } from "@/lib/actions/projects";
+import { useAuth } from "@/lib/auth";
 
 const WORK_MODES = [
   { value: "remote", label: "Remote" },
@@ -27,11 +29,12 @@ const BUDGET_UNITS = [
 ] as const;
 
 export function CreateProjectView() {
+  const { isSupabase, user } = useAuth();
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const next: Record<string, string> = {};
@@ -78,10 +81,36 @@ export function CreateProjectView() {
     }
 
     setPending(true);
-    setTimeout(() => {
-      setPending(false);
-      setDone(true);
-    }, 900);
+
+    if (!isSupabase || !user) {
+      window.setTimeout(() => {
+        setPending(false);
+        setDone(true);
+      }, 700);
+      return;
+    }
+
+    const result = await createProjectAction({
+      title,
+      description,
+      industry,
+      contract_type: "freelance",
+      work_mode: "remote",
+      country: "DE",
+      location,
+      start_date: startDate,
+      duration: "medium",
+      budget_min: budgetMin,
+      budget_max: budgetMax,
+      budget_unit: "hour",
+      skills: skills.split(/[,\n]/).map((s) => s.trim()).filter(Boolean),
+    });
+    setPending(false);
+    if (!result.ok) {
+      setErrors({ form: result.error });
+      return;
+    }
+    setDone(true);
   }
 
   if (done) return <CreateSuccess />;
@@ -386,6 +415,42 @@ export function CreateProjectView() {
               </p>
             )}
           </div>
+
+          {errors.form && (
+            <div
+              role="alert"
+              className="rounded-lg border border-warning-100 bg-warning-50 px-4 py-3 text-sm text-warning-700"
+            >
+              {errors.form}
+            </div>
+          )}
+
+          {isSupabase && !user && (
+            <div
+              role="status"
+              className="rounded-lg border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-800"
+            >
+              Sie sind nicht eingeloggt. Bitte{" "}
+              <Link href="/login" className="font-semibold underline-offset-2 hover:underline">
+                anmelden
+              </Link>{" "}
+              oder als Recruiter{" "}
+              <Link href="/register?role=company" className="font-semibold underline-offset-2 hover:underline">
+                registrieren
+              </Link>
+              , um ein echtes Projekt einzustellen.
+            </div>
+          )}
+
+          {!isSupabase && (
+            <div
+              role="status"
+              className="rounded-lg border border-warning-100 bg-warning-50 px-4 py-3 text-sm text-warning-700"
+            >
+              Demo-Modus: das Projekt wird nicht in einer Datenbank
+              gespeichert. Backend per Vercel-Marketplace → Supabase verbinden.
+            </div>
+          )}
 
           <div className="flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:items-center">
             <Button href="/dashboard" variant="ghost" size="md">

@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Bell, CheckCircle2 } from "lucide-react";
+import { ArrowUpRight, Bell, CheckCircle2, Database } from "lucide-react";
 import { MOCK_PROJECTS, MOCK_FREELANCERS } from "@/constants/mock-data";
 import { ProjectCard } from "@/components/cards/ProjectCard";
 import { Button } from "@/components/ui/Button";
+import { getDashboardStats, getMyProjects } from "@/lib/db/queries";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description:
     "Ihre persönliche Übersicht: Projekte, Anfragen, Profilstatistik und nächste Schritte.",
 };
+
+// Dashboard nutzt user-spezifische DB-Queries — bei jedem Request rendern.
+export const dynamic = "force-dynamic";
 
 const KPIS: ReadonlyArray<{ label: string; value: string }> = [
   { label: "Aktive Projekte", value: "3" },
@@ -37,8 +41,12 @@ const ACTIVITY = [
   },
 ];
 
-export default function DashboardPage() {
-  const ownProjects = MOCK_PROJECTS.slice(2, 5);
+export default async function DashboardPage() {
+  const [stats, myProjects] = await Promise.all([
+    getDashboardStats(),
+    getMyProjects(),
+  ]);
+  const ownProjects = myProjects.length > 0 ? myProjects : MOCK_PROJECTS.slice(2, 5);
   const me = MOCK_FREELANCERS[0];
   const lastName = me.fullName.split(" ").slice(-1)[0];
 
@@ -77,15 +85,27 @@ export default function DashboardPage() {
         <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_22rem]">
           <div className="space-y-6">
             <section className="rounded-2xl border border-ink-200 bg-white p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold tracking-tight text-ink-900">
-                  Empfohlene Projekte
-                </h2>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold tracking-tight text-ink-900">
+                    {myProjects.length > 0
+                      ? "Ihre Projekte"
+                      : "Empfohlene Projekte"}
+                  </h2>
+                  <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-ink-500">
+                    <Database className="h-3 w-3" aria-hidden />
+                    {myProjects.length > 0
+                      ? `Live aus Datenbank · ${myProjects.length} Einträge`
+                      : stats.isAuthenticated
+                        ? "Sie haben noch keine Projekte eingestellt — Vorschläge aus Demo-Daten"
+                        : "Demo-Daten (nicht eingeloggt)"}
+                  </p>
+                </div>
                 <Link
-                  href="/search?type=projects"
+                  href={myProjects.length > 0 ? "/projekte/erstellen" : "/search?type=projects"}
                   className="text-sm font-medium text-brand-600 hover:text-brand-700"
                 >
-                  Alle anzeigen
+                  {myProjects.length > 0 ? "+ Neues Projekt" : "Alle anzeigen"}
                 </Link>
               </div>
               <div className="mt-5 grid gap-4 md:grid-cols-2">
