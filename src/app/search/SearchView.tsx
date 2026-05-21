@@ -252,10 +252,17 @@ export function SearchView({ initialProjects, dbProjectCount = 0 }: SearchViewPr
             <h1 className="text-balance text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl">
               {results.length.toLocaleString("de-DE")} Treffer
             </h1>
-            <p className="mt-1 text-sm text-ink-500">
-              {projectCount} Projekt{projectCount === 1 ? "" : "e"} ·{" "}
-              {freelancerCount} Profil
-              {freelancerCount === 1 ? "" : "e"}
+            <p className="mt-1 inline-flex flex-wrap items-center gap-2 text-sm text-ink-500">
+              <span>
+                {projectCount} Projekt{projectCount === 1 ? "" : "e"} ·{" "}
+                {freelancerCount} Profil
+                {freelancerCount === 1 ? "" : "e"}
+              </span>
+              {dbProjectCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-success-500/10 px-2 py-0.5 text-xs font-medium text-success-600">
+                  {dbProjectCount} live aus DB
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">

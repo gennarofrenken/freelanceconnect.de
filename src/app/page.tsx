@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+// RecentProjects mischt DB-Inhalte hinzu (cookies-basierte Auth via RLS) —
+// daher pro Request rendern.
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <>

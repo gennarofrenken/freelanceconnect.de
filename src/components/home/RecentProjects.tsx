@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { MOCK_PROJECTS } from "@/constants/mock-data";
+import { ArrowRight, Database } from "lucide-react";
 import { ProjectListItem } from "@/components/cards/ProjectListItem";
+import { listAllProjectsHybrid } from "@/lib/db/listing-queries";
 
-export function RecentProjects() {
-  const items = MOCK_PROJECTS.slice(0, 8);
+export async function RecentProjects() {
+  const { combined, fromDb } = await listAllProjectsHybrid();
+  const items = combined.slice(0, 8);
 
   return (
     <section className="bg-ink-50/60">
@@ -14,8 +15,14 @@ export function RecentProjects() {
             <h2 className="text-balance text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl">
               Aktuelle Projekte
             </h2>
-            <p className="mt-2 text-ink-600">
+            <p className="mt-2 inline-flex items-center gap-2 text-ink-600">
               Eine Auswahl der neuesten Projekte verifizierter Auftraggeber.
+              {fromDb.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-success-500/10 px-2 py-0.5 text-xs font-medium text-success-600">
+                  <Database className="h-3 w-3" aria-hidden />
+                  {fromDb.length} live
+                </span>
+              )}
             </p>
           </div>
           <Link

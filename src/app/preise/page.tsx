@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Check, Lock, Sparkles, X } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { UpgradeButton } from "@/components/billing/UpgradeButton";
 
 export const metadata: Metadata = {
   title: "Preise",
@@ -248,17 +249,24 @@ function PriceCard({ plan }: { plan: Plan }) {
       </ul>
 
       <div className="mt-auto pt-6">
-        <Button
-          href={plan.cta.href}
-          variant={plan.highlighted ? "primary" : "outline"}
-          size="md"
-          className="w-full"
-        >
-          {plan.highlighted && plan.audience === "Unternehmen" && (
-            <Lock className="h-4 w-4" aria-hidden />
-          )}
-          {plan.cta.label}
-        </Button>
+        {plan.title === "Connect Pro" ? (
+          <UpgradeButton
+            label={plan.cta.label}
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-700 disabled:opacity-50"
+          />
+        ) : (
+          <Button
+            href={plan.cta.href}
+            variant={plan.highlighted ? "primary" : "outline"}
+            size="md"
+            className="w-full"
+          >
+            {plan.highlighted && plan.audience === "Unternehmen" && (
+              <Lock className="h-4 w-4" aria-hidden />
+            )}
+            {plan.cta.label}
+          </Button>
+        )}
       </div>
     </article>
   );
