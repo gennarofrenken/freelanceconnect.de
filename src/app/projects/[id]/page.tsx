@@ -14,7 +14,9 @@ import {
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { ProjectJobPostingJsonLd } from "@/components/seo/JsonLd";
 import { ContactDialog } from "@/components/details/ContactDialog";
+import { CompanyName } from "@/components/legal/Identity";
 import { FreelancerCard } from "@/components/cards/FreelancerCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
 import {
@@ -54,6 +56,7 @@ export default async function ProjectDetailPage({ params }: Params) {
 
   return (
     <div className="bg-ink-50/40">
+      <ProjectJobPostingJsonLd project={project} />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/search?type=projects"
@@ -87,7 +90,7 @@ export default async function ProjectDetailPage({ params }: Params) {
           <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-600">
             <span className="inline-flex items-center gap-1.5 font-medium text-ink-800">
               <Building2 className="h-4 w-4 text-ink-400" aria-hidden />
-              {project.company}
+              <CompanyName company={project.company} />
               {project.companyVerified && (
                 <BadgeCheck
                   className="h-4 w-4 text-brand-600"
@@ -208,7 +211,7 @@ export default async function ProjectDetailPage({ params }: Params) {
                   triggerClassName="w-full"
                 />
                 <p className="text-center text-xs text-ink-500">
-                  Bewerbung kostenfrei · ohne Vermittlungsgebühr
+                  Bewerbung mit Connect Pro · 0 % Vermittlungsgebühr
                 </p>
               </div>
             </div>
@@ -226,7 +229,7 @@ export default async function ProjectDetailPage({ params }: Params) {
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink-900">
-                    {project.company}
+                    <CompanyName company={project.company} />
                   </p>
                   <p className="text-xs text-ink-500">
                     {project.companyVerified

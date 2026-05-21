@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://freelanceconnect.de";
+import { getSiteUrl } from "@/lib/site-config";
+
+const BASE_URL = getSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +10,17 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard", "/profil", "/passwort-vergessen"],
+        disallow: [
+          "/admin",
+          "/admin/",
+          "/dashboard",
+          "/profil",
+          "/profil/",
+          "/freelancers/",
+          "/recruiter/",
+          "/passwort-vergessen",
+          "/api/",
+        ],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,

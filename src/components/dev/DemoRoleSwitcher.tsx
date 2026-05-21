@@ -20,7 +20,7 @@ const ROLES: { value: UserRole; label: string; note: string }[] = [
 ];
 
 export function DemoRoleSwitcher() {
-  const { user, loginAs } = useAuth();
+  const { user, loginAs, setFlag } = useAuth();
   const [open, setOpen] = useState(false);
 
   const currentRole: UserRole = user?.role ?? "guest";
@@ -65,7 +65,6 @@ export function DemoRoleSwitcher() {
                     type="button"
                     onClick={() => {
                       loginAs(r.value);
-                      setOpen(false);
                     }}
                     className={cn(
                       "flex w-full items-start justify-between gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
@@ -95,8 +94,71 @@ export function DemoRoleSwitcher() {
               );
             })}
           </ul>
+
+          {currentRole === "freelancer" && (
+            <FlagToggle
+              label="Connect Pro aktiv"
+              hint="19 €/Monat — Bewerbungen freischalten"
+              checked={!!user?.hasFreelancerPremium}
+              onChange={(v) => setFlag("hasFreelancerPremium", v)}
+            />
+          )}
+
+          {currentRole === "recruiter" && (
+            <FlagToggle
+              label="Recruiter-Lizenz verifiziert"
+              hint="DSGVO-Vertrag + AÜG — Profile freischalten"
+              checked={!!user?.hasRecruiterLicense}
+              onChange={(v) => setFlag("hasRecruiterLicense", v)}
+            />
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function FlagToggle({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label className="mt-3 flex cursor-pointer items-start justify-between gap-3 rounded-lg border border-ink-200 bg-ink-50/60 px-3 py-2.5">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold tracking-tight text-ink-900">
+          {label}
+        </p>
+        <p className="text-[11px] leading-snug text-ink-500">{hint}</p>
+      </div>
+      <span className="relative mt-0.5 inline-flex h-5 w-9 shrink-0 items-center">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer absolute inset-0 cursor-pointer opacity-0"
+        />
+        <span
+          aria-hidden
+          className={cn(
+            "block h-5 w-9 rounded-full transition-colors",
+            checked ? "bg-brand-600" : "bg-ink-300",
+          )}
+        />
+        <span
+          aria-hidden
+          className={cn(
+            "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-soft transition-transform",
+            checked ? "translate-x-4" : "translate-x-0.5",
+          )}
+        />
+      </span>
+    </label>
   );
 }

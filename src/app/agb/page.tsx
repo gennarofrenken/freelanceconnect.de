@@ -79,10 +79,24 @@ export default function AGBPage() {
             § 5 Vergütung
           </h2>
           <p className="mt-2 leading-relaxed">
-            Die Veröffentlichung von Projektausschreibungen und die
-            Kontaktaufnahme zwischen Auftraggeber und Freelancer ist auf der
-            Plattform vermittlungsgebührenfrei. Zusatzleistungen (z. B.
-            Premium-Listings) werden gesondert ausgewiesen.
+            Die Veröffentlichung von Projektausschreibungen und das Empfangen
+            von Anfragen ist auf der Plattform vermittlungsgebührenfrei.
+            FreelanceConnect erhebt zu keinem Zeitpunkt eine Provision auf das
+            Honorar zwischen Freelancer und Auftraggeber.
+          </p>
+          <p className="mt-3 leading-relaxed">
+            <strong>Connect Pro (Freelancer):</strong> Initiativ-Bewerbungen auf
+            Projektausschreibungen setzen das kostenpflichtige
+            Connect-Pro-Abonnement (19,00 € / Monat zzgl. USt.) voraus. Das
+            Abonnement ist monatlich zum Monatsende kündbar.
+          </p>
+          <p className="mt-3 leading-relaxed">
+            <strong>Recruiter-Lizenz (Unternehmen):</strong> Die Anzeige
+            vollständiger Freelancer-Profile, der Profil-Download und die
+            Direktkontaktaufnahme erfordern den Abschluss eines individuellen
+            Recruiter-Lizenzvertrages einschließlich
+            Auftragsverarbeitungsvertrag (AVV) nach Art. 28 DSGVO. Konditionen
+            werden im Lizenzvertrag geregelt.
           </p>
         </div>
 

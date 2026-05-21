@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
-import { MOCK_FREELANCERS, MOCK_PROJECTS } from "@/constants/mock-data";
+import { MOCK_PROJECTS } from "@/constants/mock-data";
+import { getSiteUrl } from "@/lib/site-config";
 
-const BASE_URL = "https://freelanceconnect.de";
+const BASE_URL = getSiteUrl();
 
 const STATIC_PATHS: ReadonlyArray<{
   path: string;
@@ -40,14 +41,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const freelancerEntries: MetadataRoute.Sitemap = MOCK_FREELANCERS.map(
-    (f) => ({
-      url: `${BASE_URL}/freelancers/${f.id}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }),
-  );
+  // Freelancer-Profile werden bewusst NICHT in die Sitemap aufgenommen.
+  // PII-Schutz nach DSGVO — Profildaten sind nur für lizenzierte Recruiter
+  // einsehbar und sollen nicht von Suchmaschinen indexiert werden.
 
-  return [...staticEntries, ...projectEntries, ...freelancerEntries];
+  return [...staticEntries, ...projectEntries];
 }

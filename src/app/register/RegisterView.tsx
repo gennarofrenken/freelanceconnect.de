@@ -1,13 +1,28 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, Briefcase, Building2, Check, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Building2,
+  Check,
+  Loader2,
+  Sparkles,
+  Upload,
+  X,
+} from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Checkbox } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
+import {
+  clearPrefill,
+  readPrefill,
+  type ExtractedProfile,
+} from "@/lib/cv-parser";
 
 type Role = "freelancer" | "company";
 
@@ -63,8 +78,35 @@ export function RegisterView() {
       }
     >
       <RoleSwitch role={role} onChange={setRole} />
+      {role === "freelancer" && <CvShortcut />}
       <RegisterForm role={role} />
     </AuthShell>
+  );
+}
+
+function CvShortcut() {
+  return (
+    <Link
+      href="/profil/cv-upload"
+      className="group mb-6 flex items-start gap-3 rounded-2xl border border-brand-200 bg-brand-50/60 p-4 transition-colors hover:border-brand-300 hover:bg-brand-50"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
+        <Sparkles className="h-5 w-5" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold tracking-tight text-ink-900">
+          Schneller registrieren mit Lebenslauf
+        </p>
+        <p className="mt-0.5 text-xs leading-relaxed text-ink-600">
+          Wir erkennen automatisch Name, Skills, Sprachen und Standort —
+          Sie prüfen das Ergebnis und schließen in unter 60 Sekunden ab.
+        </p>
+      </div>
+      <span className="hidden shrink-0 items-center gap-1 text-xs font-medium text-brand-700 sm:inline-flex">
+        Lebenslauf hochladen
+        <Upload className="h-3.5 w-3.5" aria-hidden />
+      </span>
+    </Link>
   );
 }
 
@@ -131,6 +173,34 @@ function RegisterForm({ role }: { role: Role }) {
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [prefill, setPrefill] = useState<ExtractedProfile | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const p = readPrefill();
+    if (!p) return;
+    setPrefill(p);
+    if (p.fullName) {
+      const parts = p.fullName.split(/\s+/);
+      if (parts.length === 1) {
+        setFirstName(parts[0]);
+      } else {
+        setFirstName(parts.slice(0, -1).join(" "));
+        setLastName(parts[parts.length - 1]);
+      }
+    }
+    if (p.email) setEmail(p.email);
+  }, []);
+
+  function discardPrefill() {
+    clearPrefill();
+    setPrefill(null);
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+  }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -191,11 +261,15 @@ function RegisterForm({ role }: { role: Role }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
+      {prefill && <PrefillBanner profile={prefill} onDiscard={discardPrefill} />}
+
       <div className="grid grid-cols-2 gap-3">
         <Field label="Vorname" htmlFor="firstName" required error={errors.firstName}>
           <Input
             id="firstName"
             name="firstName"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             autoComplete="given-name"
             invalid={Boolean(errors.firstName)}
             required
@@ -205,6 +279,8 @@ function RegisterForm({ role }: { role: Role }) {
           <Input
             id="lastName"
             name="lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             autoComplete="family-name"
             invalid={Boolean(errors.lastName)}
             required
@@ -240,6 +316,8 @@ function RegisterForm({ role }: { role: Role }) {
           id="email"
           name="email"
           type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           placeholder="vorname.nachname@firma.de"
           invalid={Boolean(errors.email)}
@@ -320,5 +398,71 @@ function RegisterForm({ role }: { role: Role }) {
         )}
       </Button>
     </form>
+  );
+}
+
+function PrefillBanner({
+  profile,
+  onDiscard,
+}: {
+  profile: ExtractedProfile;
+  onDiscard: () => void;
+}) {
+  const extras: string[] = [];
+  if (profile.title) extras.push(profile.title);
+  if (profile.location) extras.push(profile.location);
+  if (profile.yearsExperience !== undefined)
+    extras.push(`${profile.yearsExperience} J. Erfahrung`);
+
+  return (
+    <section className="rounded-2xl border border-success-500/30 bg-success-500/5 p-4">
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success-500/15 text-success-600">
+          <Sparkles className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold tracking-tight text-ink-900">
+            Daten aus Ihrem Lebenslauf übernommen
+          </p>
+          <p className="mt-0.5 text-xs leading-relaxed text-ink-600">
+            Name und E-Mail sind vorausgefüllt. Skills, Sprachen und weitere
+            Felder werden nach Abschluss in Ihrem Profil hinterlegt.
+          </p>
+          {(profile.skills.length > 0 || profile.languages.length > 0) && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {extras.map((e) => (
+                <Badge key={e} tone="neutral">
+                  {e}
+                </Badge>
+              ))}
+              {profile.skills.slice(0, 6).map((s) => (
+                <Badge key={s} tone="brand">
+                  {s}
+                </Badge>
+              ))}
+              {profile.skills.length > 6 && (
+                <span className="text-[11px] text-ink-500">
+                  +{profile.skills.length - 6} weitere
+                </span>
+              )}
+              {profile.languages.length > 0 && (
+                <Badge tone="soft">
+                  {profile.languages.slice(0, 3).join(" · ")}
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onDiscard}
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-500 hover:bg-ink-100 hover:text-ink-900"
+          aria-label="Übernommene Daten verwerfen"
+          title="Daten verwerfen"
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+    </section>
   );
 }

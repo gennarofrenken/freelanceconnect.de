@@ -28,6 +28,10 @@ export interface AuthState {
   user: AuthUser | null;
   loginAs: (role: UserRole) => void;
   logout: () => void;
+  setFlag: (
+    key: "hasFreelancerPremium" | "hasRecruiterLicense",
+    value: boolean,
+  ) => void;
 }
 
 const STORAGE_KEY = "freelanceconnect:auth:v1";
@@ -90,8 +94,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => persist(null), [persist]);
 
+  const setFlag = useCallback(
+    (
+      key: "hasFreelancerPremium" | "hasRecruiterLicense",
+      value: boolean,
+    ) => {
+      setUser((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, [key]: value };
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
   return (
-    <AuthContext.Provider value={{ user, loginAs, logout }}>
+    <AuthContext.Provider value={{ user, loginAs, logout, setFlag }}>
       {children}
     </AuthContext.Provider>
   );
@@ -100,11 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    // Fail-soft for SSR/preview – act like guest
     return {
       user: null,
       loginAs: () => undefined,
       logout: () => undefined,
+      setFlag: () => undefined,
     } satisfies AuthState;
   }
   return ctx;
@@ -114,4 +137,43 @@ export function maskCompany(company: string) {
   if (!company) return "";
   const first = company.split(/\s+/)[0];
   return `${first[0] ?? "•"}••• (für Mitglieder sichtbar)`;
+}
+
+/**
+ * Freelancer-Identität nur für lizenzierte Recruiter im Klartext.
+ * Alle anderen sehen Initialen-Abkürzung — DSGVO-konform.
+ */
+export function maskFreelancerName(fullName: string) {
+  if (!fullName) return "";
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return `${parts[0][0]}.`;
+  const first = parts[0][0];
+  const last = parts[parts.length - 1][0];
+  return `${first}. ${last}.`;
+}
+
+/* ─────────────────── Permission-Helpers ─────────────────── */
+
+export function canViewProjectClient(user: AuthUser | null): boolean {
+  return user !== null;
+}
+
+export function canApplyToProjects(user: AuthUser | null): boolean {
+  return user?.role === "freelancer" && user.hasFreelancerPremium === true;
+}
+
+export function canContactFreelancer(user: AuthUser | null): boolean {
+  return (
+    user?.role === "recruiter" &&
+    user.hasRecruiterLicense === true &&
+    user.companyVerified === true
+  );
+}
+
+export function canViewFreelancerIdentity(user: AuthUser | null): boolean {
+  return canContactFreelancer(user);
+}
+
+export function canDownloadFreelancerProfile(user: AuthUser | null): boolean {
+  return canContactFreelancer(user);
 }

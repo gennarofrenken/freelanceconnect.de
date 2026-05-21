@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { ContactDialog } from "@/components/details/ContactDialog";
+import {
+  IdentityLocation,
+  IdentityName,
+  IdentityNotice,
+} from "@/components/legal/Identity";
 import { ProjectCard } from "@/components/cards/ProjectCard";
+import { FreelancerPersonJsonLd } from "@/components/seo/JsonLd";
 import {
   getFreelancerById,
   getFreelancerProjects,
@@ -31,8 +37,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const f = getFreelancerById(id);
   if (!f) return { title: "Profil nicht gefunden" };
   return {
-    title: `${f.fullName} — ${f.title}`,
-    description: f.bio.slice(0, 160),
+    title: `${f.title} — Freelancer-Profil`,
+    description:
+      "Geprüftes IT-Freelancer-Profil. Vollständige Identität & Kontakt nur für lizenzierte Recruiter (DSGVO).",
+    robots: { index: false, follow: true },
   };
 }
 
@@ -90,7 +98,7 @@ export default async function FreelancerDetailPage({ params }: Params) {
                 </span>
                 <div className="pb-1">
                   <h1 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xl font-semibold tracking-tight text-ink-900 sm:text-2xl">
-                    {freelancer.fullName}
+                    <IdentityName fullName={freelancer.fullName} />
                     {freelancer.isVerified && (
                       <BadgeCheck
                         className="h-5 w-5 text-brand-600"
@@ -105,7 +113,10 @@ export default async function FreelancerDetailPage({ params }: Params) {
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-500">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" aria-hidden />
-                      {freelancer.location}
+                      <IdentityLocation
+                        location={freelancer.location}
+                        region={freelancer.region}
+                      />
                     </span>
                     <span>{WORK_MODE_LABEL[freelancer.workMode]}</span>
                     <span className="inline-flex items-center gap-1">
@@ -124,7 +135,7 @@ export default async function FreelancerDetailPage({ params }: Params) {
               <div className="flex flex-wrap gap-2 pb-1">
                 <ContactDialog
                   mode="contact"
-                  targetTitle={freelancer.fullName}
+                  targetTitle={freelancer.title}
                   triggerLabel="Anfragen"
                   triggerVariant="primary"
                   triggerSize="md"
@@ -133,6 +144,10 @@ export default async function FreelancerDetailPage({ params }: Params) {
             </div>
           </div>
         </header>
+
+        <div className="mt-6">
+          <IdentityNotice />
+        </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_22rem]">
           <div className="space-y-6">
@@ -212,10 +227,18 @@ export default async function FreelancerDetailPage({ params }: Params) {
                   label="Verfügbarkeit"
                   value={AVAILABILITY_LABEL[freelancer.availability]}
                 />
-                <DetailRow
+                <DetailRowNode
                   icon={<MapPin className="h-4 w-4" aria-hidden />}
                   label="Arbeitsmodell"
-                  value={`${freelancer.location} · ${WORK_MODE_LABEL[freelancer.workMode]}`}
+                  value={
+                    <>
+                      <IdentityLocation
+                        location={freelancer.location}
+                        region={freelancer.region}
+                      />{" "}
+                      · {WORK_MODE_LABEL[freelancer.workMode]}
+                    </>
+                  }
                 />
                 <DetailRow
                   icon={<Languages className="h-4 w-4" aria-hidden />}
@@ -232,14 +255,14 @@ export default async function FreelancerDetailPage({ params }: Params) {
               <div className="mt-6 flex flex-col gap-2">
                 <ContactDialog
                   mode="contact"
-                  targetTitle={freelancer.fullName}
+                  targetTitle={freelancer.title}
                   triggerLabel="Projekt anfragen"
                   triggerVariant="primary"
                   triggerSize="lg"
                   triggerClassName="w-full"
                 />
                 <p className="text-center text-xs text-ink-500">
-                  Direktkontakt · keine Vermittlungsgebühr
+                  Kontakt nur für lizenzierte Recruiter · DSGVO-konform
                 </p>
               </div>
             </div>
@@ -326,6 +349,28 @@ function DetailRow({
   icon: React.ReactNode;
   label: string;
   value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="mt-0.5 text-ink-400">{icon}</span>
+      <div>
+        <dt className="text-xs uppercase tracking-wider text-ink-500">
+          {label}
+        </dt>
+        <dd className="mt-0.5 text-sm font-medium text-ink-900">{value}</dd>
+      </div>
+    </div>
+  );
+}
+
+function DetailRowNode({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
 }) {
   return (
     <div className="flex items-start gap-3">

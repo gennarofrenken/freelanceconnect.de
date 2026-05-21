@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FreelanceConnect.de
 
-## Getting Started
+DSGVO-konforme B2B-Projektbörse für IT-Freelancer in der DACH-Region — direkte
+Vermittlung ohne Mittelmann, ohne Vermittlungsgebühr.
 
-First, run the development server:
+**Live:** https://freelanceconnect.de
+
+## Tech-Stack
+
+- **Next.js 16** (App Router, Turbopack) + **React 19**
+- **TypeScript** (strict)
+- **Tailwind CSS 4** (CSS-only Theme via `@theme`)
+- **Plus Jakarta Sans** (Fiverr-nah, modern-humanistisch)
+- **lucide-react** Icons
+- **@vercel/analytics** + **@vercel/speed-insights**
+
+## Features
+
+- Multi-Field-Suche (Skill + Stadt/PLZ) mit Quick-Categories
+- Liste/Karten-Toggle für Suchergebnisse
+- Filter: Vertragstyp, Branche (gruppiert wie freelancermap.de), Land →
+  Region → Stadt → PLZ → Umkreis, Stundensatz min/max + „ohne Rate
+  ausschließen", Projektstart (Monat/Jahr), Dauer
+- DSGVO-Gating: Auftraggeber maskiert für Gäste, Freelancer-Namen
+  pseudonymisiert ohne Recruiter-Lizenz
+- KI-Assistent als Chat-Widget
+- CV-Upload mit Mock-Profil-Extraktion
+- Recruiter-Lizenz + Connect-Pro-Abo (Stub)
+- Vollständige rechtliche Seiten (Impressum § 5 TMG, DSGVO, AGB)
+
+## Lokal starten
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm run build        # Production-Build
+npm run start        # Production-Server lokal
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment-Variablen
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Default | Zweck |
+| --- | --- | --- |
+| `NEXT_PUBLIC_DEMO_MODE` | unset | `"1"` zeigt den Demo-Rollen-Switcher (Gast/Freelancer/Recruiter) und Demo-Hinweise auch in Production. |
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Vercel-Connect auf `gennarofrenken/freelanceconnect.de` — jeder Push auf
+`main` deployt automatisch.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+git push origin main
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Sicherheit
 
-## Deploy on Vercel
+- Security-Headers (HSTS, X-Content-Type-Options, Referrer-Policy,
+  Permissions-Policy) via `next.config.ts`
+- CSP im **Report-Only**-Modus (Aktivierung als Enforce in einem
+  Folge-Step nach Beobachtung)
+- Auth-Mock + Permission-Helpers in `src/lib/auth.tsx` — vor Go-Live:
+  durch echte Auth (z. B. Supabase, NextAuth) ersetzen
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roadmap (Produktion)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Echtes Backend (Supabase / Postgres + Drizzle)
+2. NextAuth / Supabase Auth mit Session-Cookies + Server-Side-Gating
+3. Stripe-Abo für Connect-Pro (Freelancer Premium)
+4. Recruiter-Lizenz-Workflow mit Video-Ident (z. B. IDnow) + AVV-Signatur
+5. CV-Parsing serverseitig (z. B. via OpenAI Files API + JSON-Schema)
+6. E-Mail-Versand (Resend / Postmark) für Bewerbungen, Anfragen,
+   Account-Mails
+7. Echtzeit-Benachrichtigungen (Vercel Queues)
+8. Sentry für Error-Tracking
+9. CSP von Report-Only auf Enforce umstellen
+
+## Ordnerstruktur
+
+```
+src/
+  app/                # Routen (App Router)
+  components/
+    ai/               # KI-Assistent, CV-Uploader
+    cards/            # Project/Freelancer-Karten + Listen-Items
+    details/          # Detailseiten-Bausteine (z. B. ContactDialog)
+    dev/              # DemoRoleSwitcher (nur via DEMO_MODE)
+    home/             # Sektionen der Landing Page
+    layout/           # Navbar, Footer, Logo
+    legal/            # CookieConsent, ContactGate, Identity-Masking
+    search/           # SearchFiltersPanel
+    seo/              # JSON-LD-Komponenten
+    ui/               # Button, Badge, Input
+  constants/          # Industries, Skills, Mock-Daten
+  lib/                # auth, utils, cv-parser, mock-queries, assistant
+  types/              # zentrale TS-Interfaces
+```

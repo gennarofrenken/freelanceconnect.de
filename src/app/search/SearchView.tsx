@@ -70,6 +70,12 @@ export function SearchView() {
   const [sort, setSort] = useState<SortOrder>("newest");
   const [view, setView] = useState<"list" | "grid">("list");
 
+  const resetFilters = () =>
+    setFilters({ ...DEFAULT_FILTERS, type: filters.type });
+
+  const activeFilterCount = countActiveFilters(filters);
+  const showJobAlertHint = activeFilterCount >= 2;
+
   const results = useMemo<SearchResult[]>(() => {
     const includeProjects = filters.type === "all" || filters.type === "projects";
     const includeFreelancers =
@@ -294,17 +300,28 @@ export function SearchView() {
           <SearchFiltersPanel
             filters={filters}
             onChange={setFilters}
-            onReset={() =>
-              setFilters({
-                ...DEFAULT_FILTERS,
-                type: filters.type,
-              })
-            }
+            onReset={resetFilters}
           />
 
-          <section aria-label="Suchergebnisse">
+          <section aria-label="Suchergebnisse" className="space-y-4">
+            <ActiveFilterPills
+              filters={filters}
+              onChange={setFilters}
+              onResetAll={resetFilters}
+            />
+
+            {showJobAlertHint && (
+              <JobAlertHint filterSummary={filterSummary(filters)} />
+            )}
+
             {results.length === 0 ? (
-              <EmptyState />
+              <EmptyState
+                filters={filters}
+                onApplyIndustry={(industry) =>
+                  setFilters({ ...filters, industries: [industry] })
+                }
+                onReset={resetFilters}
+              />
             ) : view === "list" ? (
               <div className="overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-soft">
                 <ul>
@@ -339,15 +356,131 @@ export function SearchView() {
   );
 }
 
-function EmptyState() {
+function countActiveFilters(f: SearchFilters): number {
   return (
-    <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-12 text-center">
-      <h2 className="text-lg font-semibold tracking-tight text-ink-900">
-        Keine Treffer
-      </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm text-ink-500">
-        Lockern Sie die Filter oder versuchen Sie einen anderen Suchbegriff.
-      </p>
+    (f.query ? 1 : 0) +
+    f.workMode.length +
+    f.contractTypes.length +
+    f.industries.length +
+    f.skills.length +
+    (f.country ? 1 : 0) +
+    (f.region ? 1 : 0) +
+    (f.location ? 1 : 0) +
+    (f.postalCode ? 1 : 0) +
+    (f.budgetMin !== undefined ? 1 : 0) +
+    (f.budgetMax !== undefined ? 1 : 0) +
+    (f.excludeNoRate ? 1 : 0)
+  );
+}
+
+function filterSummary(f: SearchFilters): string {
+  const parts: string[] = [];
+  if (f.industries.length === 1) parts.push(f.industries[0]);
+  else if (f.industries.length > 1) parts.push(`${f.industries.length} Branchen`);
+  if (f.location) parts.push(f.location);
+  else if (f.region) parts.push(f.region);
+  if (f.workMode.length) parts.push(f.workMode.join(" / "));
+  return parts.slice(0, 3).join(" · ");
+}
+
+function JobAlertHint({ filterSummary }: { filterSummary: string }) {
+  return (
+    <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-brand-100 bg-brand-50/60 px-4 py-3 sm:flex-row sm:items-center">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-brand-700 ring-1 ring-brand-100">
+          <BellRing className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-ink-900">
+            Neue Projekte für diese Suche per E-Mail erhalten
+          </p>
+          {filterSummary && (
+            <p className="mt-0.5 truncate text-xs text-ink-500">
+              {filterSummary}
+            </p>
+          )}
+        </div>
+      </div>
+      <Link
+        href="/register?role=freelancer&intent=jobalert"
+        className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-700 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-800"
+      >
+        Job-Alert erstellen
+      </Link>
     </div>
   );
+}
+
+function EmptyState({
+  filters,
+  onApplyIndustry,
+  onReset,
+}: {
+  filters: SearchFilters;
+  onApplyIndustry: (industry: string) => void;
+  onReset: () => void;
+}) {
+  const relatedIndustries = getRelatedIndustries(filters);
+
+  return (
+    <div className="rounded-2xl border border-dashed border-ink-200 bg-white p-10 text-center">
+      <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink-50 text-ink-500">
+        <SearchX className="h-5 w-5" aria-hidden />
+      </span>
+      <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink-900">
+        Keine Treffer
+        {filters.query && (
+          <>
+            {" "}
+            für <span className="text-brand-700">„{filters.query}"</span>
+          </>
+        )}
+      </h2>
+      <p className="mx-auto mt-2 max-w-md text-sm text-ink-500">
+        Lockern Sie einzelne Filter oder probieren Sie eine verwandte Branche.
+      </p>
+
+      {relatedIndustries.length > 0 && (
+        <div className="mx-auto mt-6 flex max-w-md flex-wrap justify-center gap-2">
+          {relatedIndustries.map((ind) => (
+            <button
+              key={ind}
+              type="button"
+              onClick={() => onApplyIndustry(ind)}
+              className="rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+            >
+              {ind}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onReset}
+        className="mt-6 text-sm font-medium text-brand-700 underline-offset-2 hover:text-brand-800 hover:underline"
+      >
+        Alle Filter zurücksetzen
+      </button>
+    </div>
+  );
+}
+
+function getRelatedIndustries(filters: SearchFilters): string[] {
+  if (filters.industries.length === 0) {
+    return INDUSTRY_GROUPS[0].items.slice(0, 4) as string[];
+  }
+  const seen = new Set(filters.industries);
+  const related: string[] = [];
+  for (const ind of filters.industries) {
+    const group = findIndustryGroupByItem(ind);
+    if (!group) continue;
+    for (const sibling of group.items) {
+      if (!seen.has(sibling) && related.length < 4) {
+        related.push(sibling);
+        seen.add(sibling);
+      }
+    }
+  }
+  return related;
 }

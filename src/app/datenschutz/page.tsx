@@ -116,6 +116,45 @@ export default function DatenschutzPage() {
             Plattform einsehbar. Sie können Ihre Profildaten jederzeit ändern,
             sichtbar/unsichtbar schalten oder löschen.
           </p>
+          <p className="mt-3 leading-relaxed">
+            <strong>Standardmäßige Sichtbarkeit:</strong> Nicht-eingeloggte
+            Besucher sehen keine Klartextdaten von Auftraggebern. Bei
+            Freelancer-Profilen werden nur Initialen, Region (nicht der genaue
+            Ort), Skills und Bewertung angezeigt. Voller Name, exakter Standort,
+            Profil-Download als CV/PDF und die Möglichkeit zur Kontaktaufnahme
+            sind ausschließlich für Recruiter mit verifizierter
+            Recruiter-Lizenz (siehe Ziffer 6a) freigeschaltet.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold text-ink-900">
+            6a. Recruiter-Lizenz, Auftragsverarbeitung und Audit-Log
+          </h2>
+          <p className="mt-2 leading-relaxed">
+            Unternehmen, die Freelancer-Profile im Klartext einsehen,
+            herunterladen oder direkt kontaktieren möchten, schließen mit der
+            FreelanceConnect GmbH einen separaten Recruiter-Lizenzvertrag
+            inklusive Auftragsverarbeitungsvertrag (AVV) nach Art. 28 DSGVO ab.
+            Voraussetzung ist die Verifikation der Geschäftsadresse, des
+            Handelsregistereintrags und der USt-IdNr.
+          </p>
+          <p className="mt-3 leading-relaxed">
+            Jeder Zugriff auf personenbezogene Freelancer-Daten durch einen
+            lizenzierten Recruiter wird in einem revisionssicheren Audit-Log
+            mit Zeitstempel, Nutzerkennung des Recruiters, betrachtetem Profil
+            und Zugriffsart (Anzeige, Download, Kontakt) protokolliert.
+            Freelancer haben das Recht, die zu ihrer Person erfassten
+            Zugriffsprotokolle jederzeit einzusehen (Auskunftsrecht nach
+            Art. 15 DSGVO).
+          </p>
+          <p className="mt-3 leading-relaxed">
+            <strong>Bewerbungen durch Freelancer:</strong> Initiativ-Bewerbungen
+            auf Projektausschreibungen erfordern ein aktives
+            Connect-Pro-Abonnement. Auch hier wird die Übermittlung der
+            Bewerbungsdaten an den Auftraggeber dokumentiert und kann durch den
+            betroffenen Freelancer eingesehen werden.
+          </p>
         </div>
 
         <div>

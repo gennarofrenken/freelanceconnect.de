@@ -3,21 +3,12 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-
-const STORAGE_KEY = "freelanceconnect:cookie-consent:v1";
-
-type ConsentState = {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-  decidedAt?: string;
-};
-
-const DEFAULT: ConsentState = {
-  necessary: true,
-  analytics: false,
-  marketing: false,
-};
+import {
+  DEFAULT_CONSENT,
+  readConsent,
+  writeConsent,
+  type ConsentState,
+} from "@/lib/consent";
 
 const CATEGORIES: ReadonlyArray<{
   key: keyof ConsentState;
@@ -36,7 +27,7 @@ const CATEGORIES: ReadonlyArray<{
     key: "analytics",
     title: "Statistik &amp; Reichweite",
     description:
-      "Anonyme Nutzungsmessung zur Verbesserung der Plattform — keine personenbezogene Profilbildung.",
+      "Anonyme Nutzungsmessung (Vercel Analytics) zur Verbesserung der Plattform — wird ausschließlich nach Ihrer Zustimmung geladen.",
   },
   {
     key: "marketing",
@@ -47,21 +38,14 @@ const CATEGORIES: ReadonlyArray<{
 ];
 
 export function CookieSettings() {
-  const [state, setState] = useState<ConsentState>(DEFAULT);
+  const [state, setState] = useState<ConsentState>(DEFAULT_CONSENT);
   const [saved, setSaved] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<ConsentState>;
-        setState({ ...DEFAULT, ...parsed, necessary: true });
-      }
-    } catch {
-      // ignore corrupt entries
-    }
+    const existing = readConsent();
+    if (existing) setState(existing);
   }, []);
 
   function update(key: keyof ConsentState, value: boolean) {
@@ -71,10 +55,11 @@ export function CookieSettings() {
   }
 
   function persist(next: ConsentState) {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ ...next, decidedAt: new Date().toISOString() }),
-    );
+    const stored = writeConsent({
+      analytics: next.analytics,
+      marketing: next.marketing,
+    });
+    setState(stored);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -84,19 +69,11 @@ export function CookieSettings() {
   }
 
   function acceptAll() {
-    const next: ConsentState = {
-      necessary: true,
-      analytics: true,
-      marketing: true,
-    };
-    setState(next);
-    persist(next);
+    persist({ necessary: true, analytics: true, marketing: true });
   }
 
   function rejectAll() {
-    const next: ConsentState = { ...DEFAULT };
-    setState(next);
-    persist(next);
+    persist({ ...DEFAULT_CONSENT });
   }
 
   return (

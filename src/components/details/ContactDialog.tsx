@@ -8,9 +8,14 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Loader2, Lock, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea, Checkbox } from "@/components/ui/Input";
+import {
+  canApplyToProjects,
+  canContactFreelancer,
+  useAuth,
+} from "@/lib/auth";
 
 type Mode = "apply" | "contact";
 
@@ -72,6 +77,7 @@ export function ContactDialog({
   triggerSize = "md",
   triggerClassName,
 }: ContactDialogProps) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
@@ -79,6 +85,21 @@ export function ContactDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const copy = COPY[mode];
+
+  const allowed =
+    mode === "apply" ? canApplyToProjects(user) : canContactFreelancer(user);
+
+  if (!allowed) {
+    return (
+      <LockedTrigger
+        mode={mode}
+        loggedIn={!!user}
+        triggerLabel={triggerLabel}
+        triggerSize={triggerSize}
+        triggerClassName={triggerClassName}
+      />
+    );
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -336,5 +357,48 @@ export function ContactDialog({
         </div>
       )}
     </>
+  );
+}
+
+function LockedTrigger({
+  mode,
+  loggedIn,
+  triggerLabel,
+  triggerSize,
+  triggerClassName,
+}: {
+  mode: Mode;
+  loggedIn: boolean;
+  triggerLabel: ReactNode;
+  triggerSize?: "md" | "lg";
+  triggerClassName?: string;
+}) {
+  const href = !loggedIn
+    ? "/login"
+    : mode === "apply"
+      ? "/preise"
+      : "/recruiter/lizenz";
+
+  const label = !loggedIn
+    ? mode === "apply"
+      ? "Login zum Bewerben"
+      : "Login als Recruiter"
+    : mode === "apply"
+      ? "Connect Pro zum Bewerben"
+      : "Lizenz zum Kontaktieren";
+
+  const Icon = mode === "apply" ? Lock : ShieldCheck;
+
+  return (
+    <Button
+      href={href}
+      variant="outline"
+      size={triggerSize ?? "md"}
+      className={triggerClassName}
+    >
+      <Icon className="h-4 w-4" aria-hidden />
+      {label}
+      <span className="sr-only">— {String(triggerLabel)}</span>
+    </Button>
   );
 }

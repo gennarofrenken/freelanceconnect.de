@@ -2,42 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-const STORAGE_KEY = "freelanceconnect:cookie-consent:v1";
-
-interface StoredConsent {
-  necessary: true;
-  analytics: boolean;
-  marketing: boolean;
-  decidedAt?: string;
-}
+import { readConsent, writeConsent } from "@/lib/consent";
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        setVisible(true);
-        return;
-      }
-      const parsed = JSON.parse(raw) as Partial<StoredConsent>;
-      if (!parsed.decidedAt) setVisible(true);
-    } catch {
-      setVisible(true);
-    }
+    setVisible(readConsent() === null);
   }, []);
 
-  function persist(consent: StoredConsent) {
-    try {
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ ...consent, decidedAt: new Date().toISOString() }),
-      );
-    } catch {
-      // Ignore quota / privacy mode errors
-    }
+  function decide(analytics: boolean, marketing: boolean) {
+    writeConsent({ analytics, marketing });
     setVisible(false);
   }
 
@@ -65,18 +40,14 @@ export function CookieConsent() {
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={() =>
-              persist({ necessary: true, analytics: false, marketing: false })
-            }
+            onClick={() => decide(false, false)}
             className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-ink-600 hover:text-brand-700"
           >
             Nur notwendige
           </button>
           <button
             type="button"
-            onClick={() =>
-              persist({ necessary: true, analytics: true, marketing: true })
-            }
+            onClick={() => decide(true, true)}
             className="inline-flex h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-sm font-medium text-white transition-colors hover:bg-brand-700"
           >
             Akzeptieren

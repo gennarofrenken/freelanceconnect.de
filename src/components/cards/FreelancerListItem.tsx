@@ -1,10 +1,23 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock4, MapPin, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock4, Lock, MapPin, Star } from "lucide-react";
 import type { Freelancer } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { AVAILABILITY_LABEL, WORK_MODE_LABEL, formatRate } from "@/lib/utils";
+import {
+  canViewFreelancerIdentity,
+  maskFreelancerName,
+  useAuth,
+} from "@/lib/auth";
 
 export function FreelancerListItem({ freelancer }: { freelancer: Freelancer }) {
+  const { user } = useAuth();
+  const showIdentity = canViewFreelancerIdentity(user);
+  const displayName = showIdentity
+    ? freelancer.fullName
+    : maskFreelancerName(freelancer.fullName);
+
   return (
     <Link
       href={`/freelancers/${freelancer.id}`}
@@ -35,8 +48,18 @@ export function FreelancerListItem({ freelancer }: { freelancer: Freelancer }) {
           )}
         </div>
 
-        <h3 className="mt-1.5 text-[17px] font-semibold leading-snug tracking-tight text-ink-900 group-hover:text-brand-700">
-          {freelancer.fullName}
+        <h3
+          className="mt-1.5 inline-flex items-center gap-1.5 text-[17px] font-semibold leading-snug tracking-tight text-ink-900 group-hover:text-brand-700"
+          title={
+            showIdentity
+              ? undefined
+              : "Vollständiger Name nur für lizenzierte Recruiter sichtbar"
+          }
+        >
+          {!showIdentity && (
+            <Lock className="h-3.5 w-3.5 text-ink-400" aria-hidden />
+          )}
+          {displayName}
         </h3>
         <p className="text-sm text-ink-600">{freelancer.title}</p>
 
@@ -47,7 +70,7 @@ export function FreelancerListItem({ freelancer }: { freelancer: Freelancer }) {
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-ink-500">
           <span className="inline-flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" aria-hidden />
-            {freelancer.location}
+            {showIdentity ? freelancer.location : freelancer.region ?? "DACH"}
           </span>
           <span aria-hidden>·</span>
           <span>{WORK_MODE_LABEL[freelancer.workMode]}</span>
