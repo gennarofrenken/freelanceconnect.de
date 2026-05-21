@@ -2,12 +2,16 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Checkbox } from "@/components/ui/Input";
+import { useAuth } from "@/lib/auth";
 
 export function LoginView() {
+  const router = useRouter();
+  const { signInWithPassword, isSupabase } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -15,7 +19,7 @@ export function LoginView() {
   const [passwordError, setPasswordError] = useState<string>();
   const [formError, setFormError] = useState<string>();
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setEmailError(undefined);
     setPasswordError(undefined);
@@ -33,12 +37,14 @@ export function LoginView() {
     if (!ok) return;
 
     setPending(true);
-    setTimeout(() => {
-      setPending(false);
-      setFormError(
-        "Demo-Modus: Login ist in dieser Version noch nicht aktiv. Bitte registrieren Sie sich oder kontaktieren Sie uns.",
-      );
-    }, 700);
+    const { error } = await signInWithPassword(email, password);
+    setPending(false);
+    if (error) {
+      setFormError(error);
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -57,6 +63,12 @@ export function LoginView() {
         </p>
       }
     >
+      {!isSupabase && (
+        <div className="mb-5 rounded-lg border border-warning-100 bg-warning-50 px-3.5 py-2.5 text-xs text-warning-700">
+          Demo-Modus: echtes Login benötigt Supabase-ENV. Nutzen Sie den
+          Demo-Rollen-Switcher unten links zum Testen der DSGVO-Gates.
+        </div>
+      )}
       <form onSubmit={onSubmit} noValidate className="space-y-5">
         <Field label="E-Mail-Adresse" htmlFor="email" required error={emailError}>
           <Input

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt =
   "FreelanceConnect – IT-Freelancer & Projekte in der DACH-Region";
 export const size = { width: 1200, height: 630 };
@@ -52,18 +52,21 @@ export default function OpengraphImage() {
           </div>
           <div
             style={{
+              display: "flex",
               fontSize: 30,
               fontWeight: 700,
               letterSpacing: "-0.02em",
             }}
           >
-            Freelance<span style={{ color: "#7CC2FD" }}>Connect</span>
+            <span>Freelance</span>
+            <span style={{ color: "#7CC2FD" }}>Connect</span>
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
+              display: "flex",
               fontSize: 30,
               fontWeight: 600,
               letterSpacing: "0.16em",
@@ -75,6 +78,8 @@ export default function OpengraphImage() {
           </div>
           <div
             style={{
+              display: "flex",
+              flexDirection: "column",
               fontSize: 76,
               fontWeight: 800,
               letterSpacing: "-0.03em",
@@ -82,8 +87,7 @@ export default function OpengraphImage() {
               color: "white",
             }}
           >
-            Projekte und Experten.
-            <br />
+            <span>Projekte und Experten.</span>
             <span style={{ color: "#FEC84B" }}>Direkt verbunden.</span>
           </div>
         </div>

@@ -23,6 +23,7 @@ import {
   readPrefill,
   type ExtractedProfile,
 } from "@/lib/cv-parser";
+import { useAuth } from "@/lib/auth";
 
 type Role = "freelancer" | "company";
 
@@ -170,6 +171,7 @@ function RoleOption({
 }
 
 function RegisterForm({ role }: { role: Role }) {
+  const { signUp, isSupabase } = useAuth();
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -202,7 +204,7 @@ function RegisterForm({ role }: { role: Role }) {
     setEmail("");
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const next: Record<string, string> = {};
@@ -228,10 +230,19 @@ function RegisterForm({ role }: { role: Role }) {
     if (Object.keys(next).length > 0) return;
 
     setPending(true);
-    setTimeout(() => {
-      setPending(false);
-      setDone(true);
-    }, 800);
+    const { error } = await signUp({
+      email,
+      password,
+      role: role === "company" ? "recruiter" : "freelancer",
+      fullName: `${firstName} ${lastName}`,
+      companyName: role === "company" ? company : undefined,
+    });
+    setPending(false);
+    if (error) {
+      setErrors({ form: error });
+      return;
+    }
+    setDone(true);
   }
 
   if (done) {
@@ -260,6 +271,13 @@ function RegisterForm({ role }: { role: Role }) {
   }
 
   return (
+    <>
+    {!isSupabase && (
+      <div className="mb-5 rounded-lg border border-warning-100 bg-warning-50 px-3.5 py-2.5 text-xs text-warning-700">
+        Demo-Modus: echte Registrierung benötigt Supabase-ENV-Variablen.
+        Sie können das Formular ausfüllen, aber kein Konto wird angelegt.
+      </div>
+    )}
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       {prefill && <PrefillBanner profile={prefill} onDiscard={discardPrefill} />}
 
@@ -398,6 +416,7 @@ function RegisterForm({ role }: { role: Role }) {
         )}
       </Button>
     </form>
+    </>
   );
 }
 

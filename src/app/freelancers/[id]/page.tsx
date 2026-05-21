@@ -76,6 +76,10 @@ export default async function FreelancerDetailPage({ params }: Params) {
 
   return (
     <div className="bg-ink-50/40">
+      <FreelancerPersonJsonLd
+        freelancer={freelancer}
+        revealIdentity={false}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/search?type=freelancers"
